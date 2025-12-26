@@ -1,5 +1,4 @@
-// --- Types ---
-export type Role = 'Customer Success Manager' | 'Sales Enablement' | 'Software Engineer' | 'New Manager';
+export type Role = 'Software Engineer' | 'New Manager' | 'Customer Success Manager' | 'Sales Enablement';
 export type Level = 'New' | 'Intermediate' | 'Advanced';
 export type Goal = 'Performance' | 'Promotion' | 'Role Switch';
 
@@ -10,6 +9,8 @@ export interface LearningItem {
   duration: string;
   reason: string;
   confidence: number;
+  longDescription: string;
+  keyTopics: string[];
 }
 
 export interface GeneratedPlan {
@@ -27,101 +28,163 @@ export interface PlanInputs {
   handsOn: boolean;
 }
 
-// --- Data ---
-const ROLE_SKILLS: Record<Role, string[]> = {
-  'Customer Success Manager': ['Client Empathy', 'Product Knowledge', 'Retention Strategy', 'QBR Management'],
-  'Sales Enablement': ['Content Strategy', 'Sales Methodology', 'Stakeholder Mgmt', 'Data Analysis'],
-  'Software Engineer': ['System Design', 'Clean Code', 'Testing', 'CI/CD Pipelines'],
-  'New Manager': ['Delegation', 'Conflict Resolution', 'Performance Reviews', 'Team Culture']
-};
-
-const CONTENT_POOL: Record<Role, Record<Level, LearningItem[]>> = {
-  'Customer Success Manager': {
-    'New': [
-      { id: 'csm-1', title: 'Foundations of Customer Success', type: 'Course', duration: '2h', reason: 'Learn the basics before talking to clients', confidence: 98 },
-      { id: 'csm-2', title: 'Mock QBR Workshop', type: 'Workshop', duration: '1.5h', reason: 'Practice a real business review', confidence: 92 },
-    ],
-    'Intermediate': [
-      { id: 'csm-3', title: 'Advanced Retention Tactics', type: 'Course', duration: '3h', reason: 'How to stop customers from leaving', confidence: 89 },
-      { id: 'csm-4', title: 'Data-Driven Account Health', type: 'Project', duration: '4h', reason: 'Analyze why your accounts are at risk', confidence: 95 },
-    ],
-    'Advanced': [
-      { id: 'csm-5', title: 'Strategic Account Leadership', type: 'Course', duration: '5h', reason: 'Managing the biggest clients', confidence: 91 },
-      { id: 'csm-6', title: 'Mentoring Junior CSMs', type: 'Workshop', duration: '2h', reason: 'Teaching others what you know', confidence: 85 },
-    ]
-  },
+const CONTENT_CATALOG: Record<Role, Record<Level, LearningItem[]>> = {
   'Software Engineer': {
     'New': [
-      { id: 'swe-1', title: 'Git & Version Control Mastery', type: 'Course', duration: '3h', reason: 'You can\'t code without Git', confidence: 99 },
-      { id: 'swe-2', title: 'Code Review Etiquette', type: 'Reading', duration: '45m', reason: 'How to critique code nicely', confidence: 88 },
+      { 
+        id: 'swe-n1', title: 'Clean Code & SOLID Principles', type: 'Course', duration: '4h', reason: 'Critical for team velocity.', confidence: 99,
+        longDescription: 'Learn to write code that is easy to read and maintain. This course covers the core principles of software craftsmanship in a team environment.',
+        keyTopics: ['Naming Conventions', 'Single Responsibility', 'Dependency Injection', 'Dry vs Wet Code']
+      },
+      { 
+        id: 'swe-n2', title: 'Test-Driven Development (TDD)', type: 'Project', duration: '6h', reason: 'Practice writing robust tests.', confidence: 94,
+        longDescription: 'Shift to a test-first mindset. This project guides you through the Red-Green-Refactor cycle while building a reliable API client.',
+        keyTopics: ['Jest & Vitest', 'Mocking Dependencies', 'Edge Case Detection', 'Integration Testing']
+      }
     ],
     'Intermediate': [
-      { id: 'swe-3', title: 'Design Patterns in Production', type: 'Course', duration: '4h', reason: 'Writing code that scales', confidence: 94 },
-      { id: 'swe-4', title: 'Refactoring Legacy Code', type: 'Project', duration: '6h', reason: 'Cleaning up old messes safely', confidence: 92 },
+      { 
+        id: 'swe-i1', title: 'Distributed Systems Architecture', type: 'Course', duration: '8h', reason: 'Scaling applications beyond a single server.', confidence: 92,
+        longDescription: 'Explore the challenges of high-availability systems. We cover data consistency, load balancing, and microservice trade-offs.',
+        keyTopics: ['CAP Theorem', 'Load Balancing', 'Message Queues', 'Database Sharding']
+      },
+      { 
+        id: 'swe-i2', title: 'CI/CD Pipeline Optimization', type: 'Project', duration: '5h', reason: 'Speeding up automated deployments.', confidence: 95,
+        longDescription: 'Build a production-ready pipeline that automates testing, security scanning, and multi-region deployment.',
+        keyTopics: ['GitHub Actions', 'Docker Containerization', 'Blue/Green Deployment', 'Rollback Strategies']
+      }
     ],
     'Advanced': [
-      { id: 'swe-5', title: 'Distributed Systems Architecture', type: 'Course', duration: '8h', reason: 'Designing the whole system', confidence: 87 },
-      { id: 'swe-6', title: 'Staff Engineer Leadership', type: 'Reading', duration: '2h', reason: 'Influencing technical decisions', confidence: 85 },
+      { 
+        id: 'swe-a1', title: 'Staff Engineer Leadership', type: 'Workshop', duration: '4h', reason: 'Driving technical direction.', confidence: 85,
+        longDescription: 'Learn to influence technical decisions across multiple teams and mentor senior developers effectively.',
+        keyTopics: ['RFC Processes', 'Architecture Reviews', 'Technical Debt Strategy', 'Cross-team Alignment']
+      },
+      { 
+        id: 'swe-a2', title: 'System Design for Global Scale', type: 'Course', duration: '12h', reason: 'Handling millions of concurrent users.', confidence: 93,
+        longDescription: 'Deep dive into geo-distributed databases, global CDN caching, and high-concurrency event processing.',
+        keyTopics: ['Anycast Routing', 'Consistency Models', 'Eventual Consistency', 'Multi-region Failover']
+      }
+    ]
+  },
+  'New Manager': {
+    'New': [
+      { 
+        id: 'nm-n1', title: 'The Manager Transition', type: 'Course', duration: '3h', reason: 'Shifting from individual output to team enablement.', confidence: 97,
+        longDescription: 'The biggest challenge for new managers is letting go of the keyboard. Learn situational leadership and delegation frameworks.',
+        keyTopics: ['Delegation', 'Situational Leadership', 'One-on-One Frameworks', 'Active Listening']
+      }
+    ],
+    'Intermediate': [
+      { 
+        id: 'nm-i1', title: 'Performance Management Lab', type: 'Workshop', duration: '3h', reason: 'Delivering difficult feedback effectively.', confidence: 91,
+        longDescription: 'Learn to manage high and low performers. We practice delivering hard feedback while maintaining psychological safety.',
+        keyTopics: ['Radical Candor', 'PIP Management', 'Career Pathing', 'Bias in Reviews']
+      }
+    ],
+    'Advanced': [
+      { 
+        id: 'nm-a1', title: 'Scaling Team Culture', type: 'Course', duration: '6h', reason: 'Maintaining values during hyper-growth.', confidence: 88,
+        longDescription: 'How to hire and retain talent when the team size doubles. Includes hiring rubric design and values-based interviewing.',
+        keyTopics: ['Hiring Bars', 'Inclusive Culture', 'Retention Metrics', 'Org Structure Design']
+      }
+    ]
+  },
+  'Customer Success Manager': {
+    'New': [
+      { 
+        id: 'csm-n1', title: 'Client Relationship Foundations', type: 'Course', duration: '3h', reason: 'Establishing trust with new accounts.', confidence: 96,
+        longDescription: 'Master the first 90 days of the customer lifecycle. Learn to identify key stakeholders and map their success criteria.',
+        keyTopics: ['Active Listening', 'Success Mapping', 'Onboarding Frameworks', 'Email Etiquette']
+      }
+    ],
+    'Intermediate': [
+      { 
+        id: 'csm-i1', title: 'Data-Driven Retention', type: 'Project', duration: '6h', reason: 'Using usage metrics to prevent churn.', confidence: 93,
+        longDescription: 'Identify account health signals before they become problems. Learn to build "at-risk" dashboards using product data.',
+        keyTopics: ['Usage Analytics', 'Churn Indicators', 'Renewal Forecasting', 'Expansion Strategy']
+      }
+    ],
+    'Advanced': [
+      { 
+        id: 'csm-a1', title: 'Strategic Partnership Strategy', type: 'Workshop', duration: '5h', reason: 'Managing enterprise-level stakeholders.', confidence: 90,
+        longDescription: 'Transition from a vendor to a strategic partner. Learn to conduct Executive Business Reviews (EBRs) that demonstrate ROI.',
+        keyTopics: ['EBR Delivery', 'ROI Quantification', 'Political Mapping', 'Contract Negotiation']
+      }
     ]
   },
   'Sales Enablement': {
-    'New': [{ id: 'se-1', title: 'Sales Cycle 101', type: 'Course', duration: '2h', reason: 'Understanding how sales actually works', confidence: 95 }],
-    'Intermediate': [{ id: 'se-2', title: 'Content Audit Strategy', type: 'Project', duration: '4h', reason: 'Fixing your messy content library', confidence: 90 }],
-    'Advanced': [{ id: 'se-3', title: 'Revenue Operations Alignment', type: 'Workshop', duration: '3h', reason: 'Proving ROI to leadership', confidence: 88 }]
-  },
-  'New Manager': {
-    'New': [{ id: 'nm-1', title: 'The First 90 Days', type: 'Reading', duration: '3h', reason: 'Stop coding, start leading', confidence: 97 }],
-    'Intermediate': [{ id: 'nm-2', title: 'Having Difficult Conversations', type: 'Workshop', duration: '2h', reason: 'Giving feedback without panicking', confidence: 94 }],
-    'Advanced': [{ id: 'nm-3', title: 'Building High-Performance Teams', type: 'Course', duration: '5h', reason: 'Hiring and scaling your team', confidence: 91 }]
+    'New': [
+      { 
+        id: 'se-n1', title: 'Sales Cycle Fundamentals', type: 'Course', duration: '2h', reason: 'Aligning content to the sales journey.', confidence: 98,
+        longDescription: 'Understand the standard sales stages from lead to close. Map your existing content library to specific buyer pain points.',
+        keyTopics: ['Sales Funnel', 'Buyer Personas', 'Sales Methodology', 'Content Mapping']
+      }
+    ],
+    'Intermediate': [
+      { 
+        id: 'se-i1', title: 'Competitive Intelligence Mapping', type: 'Project', duration: '4h', reason: 'Enabling reps to win against rivals.', confidence: 92,
+        longDescription: 'Build "battlecards" that give sales reps the talk tracks they need to handle competitive objections in real-time.',
+        keyTopics: ['Battlecard Design', 'Market Analysis', 'Objection Handling', 'Win/Loss Interviews']
+      }
+    ],
+    'Advanced': [
+      { 
+        id: 'se-a1', title: 'Revenue Operations Alignment', type: 'Workshop', duration: '3h', reason: 'Connecting Sales, Marketing, and Success data.', confidence: 85,
+        longDescription: 'Learn to align your training programs with actual revenue data. Measure the "Time to Productivity" for new sales hires.',
+        keyTopics: ['RevOps Data', 'Sales Onboarding Metrics', 'LMS Integration', 'ROI of Learning']
+      }
+    ]
   }
 };
 
-// --- Generator Function ---
 export async function generatePlan(inputs: PlanInputs): Promise<GeneratedPlan> {
-  // Simulate network latency
   await new Promise(resolve => setTimeout(resolve, 800));
 
-  const baseSkills = ROLE_SKILLS[inputs.role];
   let gaps: string[] = [];
-  
-  if (inputs.level === 'New') gaps = [baseSkills[0], baseSkills[1], 'Onboarding'];
-  else if (inputs.level === 'Intermediate') gaps = [baseSkills[2], 'Process Improvement', 'Communication'];
-  else gaps = [baseSkills[3], 'Strategy', 'Mentorship'];
+  if (inputs.level === 'New') gaps = ['Core Workflow', 'Tool Proficiency', 'Standard Process'];
+  else if (inputs.level === 'Intermediate') gaps = ['Process Optimization', 'Collaboration', 'Analytics'];
+  else gaps = ['Strategic Impact', 'Leadership', 'Organizational Design'];
 
-  if (inputs.goal === 'Promotion') gaps.push('Leadership');
-  if (inputs.goal === 'Role Switch') gaps.unshift('Transferable Skills');
+  if (inputs.goal === 'Promotion') gaps.push('Executive Presence');
+  if (inputs.goal === 'Role Switch') gaps.unshift('Transferable Theory');
 
-  const rawContent = CONTENT_POOL[inputs.role][inputs.level] || CONTENT_POOL[inputs.role]['New'];
+  // Logic: Try to get data for specific level, if empty try 'New' for that role, if still empty use global fallback.
+  const roleData = CONTENT_CATALOG[inputs.role];
+  let rawPath = roleData[inputs.level];
   
-  const path = rawContent.map(item => ({
+  if (!rawPath || rawPath.length === 0) {
+    rawPath = roleData['New'] || [];
+  }
+
+  // Final emergency fallback if the role/level combo is totally missing
+  if (rawPath.length === 0) {
+    rawPath = [{
+        id: 'fallback-1',
+        title: `Professional Foundations: ${inputs.role}`,
+        type: 'Course',
+        duration: '3h',
+        reason: 'Essential skills for your current role and level.',
+        confidence: 85,
+        longDescription: 'A curated overview of the core competencies required to succeed in this role at your experience level.',
+        keyTopics: ['Core Methodology', 'Communication', 'Industry Standards']
+    }];
+  }
+
+  const path = rawPath.map(item => ({
     ...item,
     type: inputs.handsOn && item.type === 'Course' ? 'Project' as const : item.type,
-    duration: inputs.handsOn ? '1.5x duration (Interactive)' : item.duration,
-    reason: inputs.goal === 'Performance' ? `${item.reason} (Fast Track)` : item.reason
+    duration: inputs.handsOn ? '1.5x duration (Lab)' : item.duration
   }));
-
-  if (path.length < 3) {
-    path.push({
-      id: 'gen-1',
-      title: inputs.handsOn ? 'Applied Capstone Project' : 'Advanced Certification',
-      type: inputs.handsOn ? 'Project' : 'Course',
-      duration: '4h',
-      reason: 'Proving you actually learned it',
-      confidence: 85
-    });
-  }
 
   return {
     role: inputs.role,
     gaps,
     path,
     aiReasoning: [
-      `It looked at the requirements for a ${inputs.level} ${inputs.role}.`,
-      `It swapped generic videos for ${inputs.handsOn ? 'hands-on projects' : 'guided courses'} because you asked for it.`,
+      `Selected ${inputs.level} modules based on the ${inputs.role} competency model.`,
+      `Adjusted for ${inputs.handsOn ? 'active project work' : 'structured guided learning'}.`
     ],
-    limitations: [
-      "We need to make sure the data doesn't favor one demographic.",
-      "A real manager should still review this plan before it's assigned."
-    ]
+    limitations: ["Based on generalized role definitions."]
   };
 }
